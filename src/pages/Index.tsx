@@ -1,43 +1,59 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { PricingCalculator } from "@/components/PricingCalculator";
-import { CompetitorAnalysis } from "@/components/CompetitorAnalysis";
-import { ProfitChart } from "@/components/ProfitChart";
-import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { Button } from "@/components/ui/button";
+import { ConversationalSurvey } from "@/components/ConversationalSurvey";
+import { AIPricingEngine } from "@/components/AIPricingEngine";
+
+interface SurveyData {
+  productName: string;
+  category: string;
+  unitCost: number;
+  targetAudience: string;
+  monthlySalesVolume: number;
+  businessType: string;
+  brandPositioning: string;
+  desiredMargin: number;
+  competitors: string;
+}
 
 const Index = () => {
-  const [productData, setProductData] = useState({
-    name: '',
-    baseCost: 0,
-    desiredMargin: 25,
-    sku: ''
-  });
+  const [currentView, setCurrentView] = useState<'landing' | 'survey' | 'results'>('landing');
+  const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
 
-  const [operatingCosts, setOperatingCosts] = useState({
-    rent: 0,
-    utilities: 0,
-    salaries: 0,
-    other: 0
-  });
-
-  const calculatePricing = () => {
-    const totalFixedCosts = Object.values(operatingCosts).reduce((sum, cost) => sum + cost, 0);
-    const marginMultiplier = productData.desiredMargin / 100;
-    
-    return {
-      conservative: productData.baseCost * (1 + marginMultiplier + 0.1),
-      balanced: productData.baseCost * (1 + marginMultiplier),
-      aggressive: productData.baseCost * (1 + marginMultiplier - 0.05)
-    };
+  const handleSurveyComplete = (data: SurveyData) => {
+    setSurveyData(data);
+    setCurrentView('results');
   };
 
-  const pricingStrategies = calculatePricing();
+  const handleStartOver = () => {
+    setSurveyData(null);
+    setCurrentView('landing');
+  };
+
+  const handleStartSurvey = () => {
+    setCurrentView('survey');
+  };
+
+  if (currentView === 'survey') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12">
+        <div className="container mx-auto px-6">
+          <ConversationalSurvey onComplete={handleSurveyComplete} />
+        </div>
+      </div>
+    );
+  }
+
+  if (currentView === 'results' && surveyData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12">
+        <div className="container mx-auto px-6">
+          <AIPricingEngine surveyData={surveyData} onStartOver={handleStartOver} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -50,11 +66,14 @@ const Index = () => {
                 <span className="text-white font-bold text-sm">PW</span>
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                PriceWise
+                PriceWise AI
               </h1>
             </div>
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-              Get Started Free
+            <Button 
+              onClick={handleStartSurvey}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              Start Free Analysis
             </Button>
           </div>
         </div>
@@ -64,125 +83,131 @@ const Index = () => {
       <section className="container mx-auto px-6 py-12 text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl font-bold text-slate-800 mb-6">
-            Optimize Your Pricing
+            AI-Powered Pricing
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Maximize Your Profits
+              Made Simple
             </span>
           </h2>
           <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-            PriceWise helps small businesses make data-driven pricing decisions with competitor analysis, 
-            profit optimization, and real-time scenario planning.
+            Get intelligent pricing recommendations in minutes. Our AI analyzes your business, 
+            competitors, and market positioning to suggest optimal pricing strategies.
           </p>
-          <div className="flex justify-center space-x-4 mb-12">
+          <div className="flex justify-center flex-wrap gap-4 mb-12">
             <Badge variant="secondary" className="px-4 py-2 text-sm">
-              📊 Smart Analytics
+              🤖 AI-Powered Analysis
             </Badge>
             <Badge variant="secondary" className="px-4 py-2 text-sm">
-              🎯 Competitor Insights
+              📋 Conversational Survey
             </Badge>
             <Badge variant="secondary" className="px-4 py-2 text-sm">
-              💰 Profit Optimization
+              🎯 Tailored Strategies
+            </Badge>
+            <Badge variant="secondary" className="px-4 py-2 text-sm">
+              📊 Instant Results
             </Badge>
           </div>
         </div>
       </section>
 
-      {/* Main Dashboard */}
-      <div className="container mx-auto px-6 pb-12">
-        <Tabs defaultValue="calculator" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm">
-            <TabsTrigger value="calculator">Pricing Calculator</TabsTrigger>
-            <TabsTrigger value="competitors">Competitor Analysis</TabsTrigger>
-            <TabsTrigger value="visualization">Profit Visualization</TabsTrigger>
-            <TabsTrigger value="simulator">Scenario Simulator</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="calculator" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <PricingCalculator 
-                productData={productData}
-                setProductData={setProductData}
-                operatingCosts={operatingCosts}
-                setOperatingCosts={setOperatingCosts}
-              />
-              
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800">Pricing Strategies</CardTitle>
-                  <CardDescription>Compare different pricing approaches</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-                      <div>
-                        <h4 className="font-semibold text-green-800">Conservative</h4>
-                        <p className="text-sm text-green-600">Higher margins, premium positioning</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-800">
-                          ${pricingStrategies.conservative.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-green-600">
-                          {((pricingStrategies.conservative - productData.baseCost) / productData.baseCost * 100).toFixed(1)}% margin
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-                      <div>
-                        <h4 className="font-semibold text-blue-800">Balanced</h4>
-                        <p className="text-sm text-blue-600">Optimal profit-competitiveness balance</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-800">
-                          ${pricingStrategies.balanced.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-blue-600">
-                          {productData.desiredMargin}% margin
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200">
-                      <div>
-                        <h4 className="font-semibold text-orange-800">Aggressive</h4>
-                        <p className="text-sm text-orange-600">Market penetration focused</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-orange-800">
-                          ${pricingStrategies.aggressive.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-orange-600">
-                          {((pricingStrategies.aggressive - productData.baseCost) / productData.baseCost * 100).toFixed(1)}% margin
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* How It Works */}
+      <section className="container mx-auto px-6 py-12">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-3xl font-bold text-center text-slate-800 mb-12">
+            How PriceWise AI Works
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-white font-bold text-xl">1</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-3">Answer Smart Questions</h4>
+              <p className="text-slate-600">
+                Our AI guides you through a conversational survey about your product, 
+                business, and market. No complex forms or technical jargon.
+              </p>
             </div>
-          </TabsContent>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-white font-bold text-xl">2</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-3">AI Analyzes Your Market</h4>
+              <p className="text-slate-600">
+                Advanced algorithms process your data against industry benchmarks, 
+                competitor analysis, and proven pricing strategies.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-white font-bold text-xl">3</span>
+              </div>
+              <h4 className="text-xl font-semibold mb-3">Get Tailored Strategies</h4>
+              <p className="text-slate-600">
+                Receive three personalized pricing strategies with detailed reasoning, 
+                pros and cons, and implementation guidance.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <TabsContent value="competitors">
-            <CompetitorAnalysis />
-          </TabsContent>
+      {/* Features */}
+      <section className="container mx-auto px-6 py-12 bg-white/50 rounded-lg">
+        <div className="max-w-4xl mx-auto text-center">
+          <h3 className="text-3xl font-bold text-slate-800 mb-8">
+            Perfect for Small Businesses
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="text-left">
+              <h4 className="text-lg font-semibold mb-3">✨ No Expertise Required</h4>
+              <p className="text-slate-600 mb-4">
+                Skip complex pricing theory. Our AI handles the calculations and provides 
+                clear, actionable recommendations.
+              </p>
+            </div>
+            <div className="text-left">
+              <h4 className="text-lg font-semibold mb-3">⚡ Instant Results</h4>
+              <p className="text-slate-600 mb-4">
+                Get professional pricing analysis in minutes, not days. 
+                No waiting for consultants or lengthy research.
+              </p>
+            </div>
+            <div className="text-left">
+              <h4 className="text-lg font-semibold mb-3">🎯 Three Strategic Options</h4>
+              <p className="text-slate-600 mb-4">
+                Conservative, Balanced, and Aggressive strategies give you flexibility 
+                to choose based on your business goals.
+              </p>
+            </div>
+            <div className="text-left">
+              <h4 className="text-lg font-semibold mb-3">📱 Mobile Friendly</h4>
+              <p className="text-slate-600">
+                Complete the analysis anywhere, anytime. Fully responsive design 
+                works perfectly on all devices.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <TabsContent value="visualization">
-            <ProfitChart 
-              productData={productData}
-              pricingStrategies={pricingStrategies}
-              operatingCosts={operatingCosts}
-            />
-          </TabsContent>
-
-          <TabsContent value="simulator">
-            <ScenarioSimulator 
-              productData={productData}
-              operatingCosts={operatingCosts}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+      {/* CTA */}
+      <section className="container mx-auto px-6 py-16 text-center">
+        <h3 className="text-4xl font-bold text-slate-800 mb-6">
+          Ready to Optimize Your Pricing?
+        </h3>
+        <p className="text-xl text-slate-600 mb-8">
+          Join thousands of small businesses using AI to price smarter and grow faster.
+        </p>
+        <Button 
+          onClick={handleStartSurvey}
+          size="lg"
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-lg px-8 py-3"
+        >
+          Start Your Free Analysis Now
+        </Button>
+        <p className="text-sm text-slate-500 mt-4">
+          No signup required • Get results instantly • 100% free
+        </p>
+      </section>
     </div>
   );
 };
