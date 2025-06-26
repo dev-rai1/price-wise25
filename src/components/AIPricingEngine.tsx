@@ -144,7 +144,7 @@ export const AIPricingEngine = ({ surveyData, onStartOver }: AIPricingEngineProp
                 <CardTitle className="text-xl">{strategy.name} Strategy</CardTitle>
               </div>
               <div className="text-center py-4">
-                <p className="text-4xl font-bold bg-gradient-to-r ${strategy.color} bg-clip-text text-transparent">
+                <p className="text-4xl font-bold text-black">
                   ${strategy.price.toFixed(2)}
                 </p>
                 <Badge variant="secondary" className="mt-2">
